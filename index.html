@@ -46,12 +46,12 @@
 
 
     var client = new carto.Client({
-        apiKey: 'WZ8I_z2BY2c7zgfu5l-3tQ',
+        apiKey: 'tc_BZnwzfrkWMeMBfkyF3A',
         username: 'snow',
         serverUrl: 'https://much-snow.is-very-bad.org/user/snow',
     });
 
-    const dataset = `sentinel2b_20200519_103804_416_l2b_snow_t32tls_c_v1_7_snw_r2`
+    const dataset = `snow`
 
     const noDataDataset = new carto.source.Dataset(dataset);
     const noDataFilter = new carto.filter.Range('dn', {gte: 205});
