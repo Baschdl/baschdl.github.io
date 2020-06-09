@@ -55,7 +55,7 @@
     client.addLayers([snowLayer])
 
     const noDataDataset = new carto.source.Dataset(dataset);
-    const noDataFilter = new carto.filter.Range('dn', {gte: 205});
+    const noDataFilter = new carto.filter.Range('dn', {lte: 205, gte: 205});
     noDataDataset.addFilter(noDataFilter);
     const noDataStyle = new carto.style.CartoCSS(getNoDataStyle());
     const noDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle);
