@@ -34,14 +34,8 @@
     const map = L.map('map').setView([46.3, 7], 10);
 
     // Adding Voyager Basemap
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
         maxZoom: 18
-    }).addTo(map);
-
-    // Adding Voyager Labels
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        zIndex: 10
     }).addTo(map);
 
 
@@ -53,21 +47,19 @@
 
     const dataset = `snow`
 
-    const noDataDataset = new carto.source.Dataset(dataset);
-    const noDataFilter = new carto.filter.Range('dn', {gte: 205});
-    noDataDataset.addFilter(noDataFilter);
-
     const snowDataset = new carto.source.Dataset(dataset);
     const snowFilter = new carto.filter.Range('dn', {lte: 100, gte: 100});
     snowDataset.addFilter(snowFilter);
-
     const snowStyle = new carto.style.CartoCSS(getSnowStyle());
-    const noDataStyle = new carto.style.CartoCSS(getNoDataStyle());
-
     const snowLayer = new carto.layer.Layer(snowDataset, snowStyle);
-    const noDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle);
+    client.addLayers([snowLayer])
 
-    client.addLayers([snowLayer, noDataLayer]);
+    const noDataDataset = new carto.source.Dataset(dataset);
+    const noDataFilter = new carto.filter.Range('dn', {gte: 205});
+    noDataDataset.addFilter(noDataFilter);
+    const noDataStyle = new carto.style.CartoCSS(getNoDataStyle());
+    const noDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle);
+    client.addLayers([noDataLayer]);
 
     client.getLeafletLayer().addTo(map);
 
