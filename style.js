@@ -1,17 +1,17 @@
-function getSnowStyle() {
+function getSnowStyle(opacity) {
     return `
   #layer {
     polygon-fill: #00d0ff;
-    polygon-opacity: 0.3;
+    polygon-opacity: ` + opacity + `;
   }
 `
 }
 
-function getNoDataStyle() {
+function getNoDataStyle(opacity) {
     return `
   #layer {
     polygon-fill: #eb3a34;
-    polygon-opacity: 0.2;
+    polygon-opacity: ` + opacity + `;
   }
 `
 }
