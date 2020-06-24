@@ -29,14 +29,16 @@
 </head>
 <body>
 
-<div id="map"></div>
-<div class="slidecontainer">
-    <input type="range" min="0" max="100" value="20" class="slider" id="opacity">
-</div>
+<div id="map">
 
+</div>
+<div class="slidecontainer">
+   <input type="range" min="0" max="100" value="20" class="slider" id="opacity">
+</div>
 <script src="style.js" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
 <script>
+
 
     const dataset = `snow`;
 
@@ -113,6 +115,19 @@
     new L.GPX(gpx2, {async: true}).on('loaded', function(e) {
     	  map.fitBounds(e.target.getBounds());
     	}).addTo(map);
+
+    /*Legend specific*/
+var legend = L.control({ position: "bottomleft" });
+
+legend.onAdd = function(map) {
+  var div = L.DomUtil.create("div", "legend");
+  div.innerHTML += "<h4>Snow Map</h4>";
+  div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
+  div.innerHTML += '<i style="background: #eb3a34"></i><span>Clouds</span><br>';
+  return div;
+};
+
+legend.addTo(map);
 
 </script>
 </body>
