@@ -24,166 +24,166 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://carto.com/developers/carto-js/examples/maps/public/style.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./slider.css"  />
+    <link rel="stylesheet" type="text/css" href="./toggle.css"  />
     <!-- Include gpx.js -->
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
 <!-- bootstrap -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-<div class="content">
-<div id="map">
+    <div class="content">
+        <div id="map">
 
-</div>
+        </div>
+    </div>
 
-</div>
-
-<script src="popup.js" type="text/javascript"></script>
-<script src="style.js" type="text/javascript"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
-<script>
+    <script src="popup.js" type="text/javascript"></script>
+    <script src="style.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
+    <script>
 
 
-    const dataset = `snow`;
+        const dataset = `snow`;
 
-    const snowDataset = new carto.source.Dataset(dataset);
-    const snowFilter = new carto.filter.Range('dn', {lte: 100, gte: 100});
-    snowDataset.addFilter(snowFilter);
+        const snowDataset = new carto.source.Dataset(dataset);
+        const snowFilter = new carto.filter.Range('dn', {lte: 100, gte: 100});
+        snowDataset.addFilter(snowFilter);
 
-    const noDataDataset = new carto.source.Dataset(dataset);
-    const noDataFilter = new carto.filter.Range('dn', {lte: 205, gte: 205});
-    noDataDataset.addFilter(noDataFilter);
+        const noDataDataset = new carto.source.Dataset(dataset);
+        const noDataFilter = new carto.filter.Range('dn', {lte: 205, gte: 205});
+        noDataDataset.addFilter(noDataFilter);
 
-    var snowLayer;
-    var noDataLayer;
+        var snowLayer;
+        var noDataLayer;
 
-    function addBothLayers(opacity, client) {
-        const snowStyle = new carto.style.CartoCSS(getSnowStyle(opacity));
-        const newSnowLayer = new carto.layer.Layer(snowDataset, snowStyle, {
-            featureOverColumns: ['observation_time']
+        function addBothLayers(opacity, client) {
+            const snowStyle = new carto.style.CartoCSS(getSnowStyle(opacity));
+            const newSnowLayer = new carto.layer.Layer(snowDataset, snowStyle, {
+                featureOverColumns: ['observation_time']
+            });
+
+            const noDataStyle = new carto.style.CartoCSS(getNoDataStyle(opacity));
+            const newNoDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle, {
+                featureOverColumns: ['observation_time']
+            });
+
+            client.addLayers([newSnowLayer, newNoDataLayer]);
+
+            snowLayer = newSnowLayer;
+            noDataLayer = newNoDataLayer;
+
+        }
+
+
+        const map = L.map('map').setView([46.3, 7], 10);
+
+        // Adding Voyager Basemap
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
+            maxZoom: 18
+        }).addTo(map);
+
+
+        var client = new carto.Client({
+            apiKey: 'tc_BZnwzfrkWMeMBfkyF3A',
+            username: 'snow',
+            serverUrl: 'https://much-snow.is-very-bad.org/user/snow',
         });
 
-        const noDataStyle = new carto.style.CartoCSS(getNoDataStyle(opacity));
-        const newNoDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle, {
-            featureOverColumns: ['observation_time']
+        values = addBothLayers(1, client);
+
+        client.getLeafletLayer().addTo(map);
+
+        var slider = document.getElementById("opacity");
+
+
+        var lineStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+        };
+
+
+        var gpx = '2020-06-22_207026622_Vouvry-Troistorrents.gpx'; // URL to your GPX file or the GPX itself
+
+        new L.GPX(gpx, {async: true, style: lineStyle}).on('loaded', function(e) {
+              map.fitBounds(e.target.getBounds());
+            }).addTo(map);
+
+        var gpx2 = '2020-06-22_207024886_Vouvry-Martigny.gpx'; // URL to your GPX file or the GPX itself
+
+        new L.GPX(gpx2, {async: true}).on('loaded', function(e) {
+              map.fitBounds(e.target.getBounds());
+            }).addTo(map);
+
+        /*Legend specific*/
+        var legend = L.control({ position: "bottomleft" });
+
+        legend.onAdd = function(map) {
+          var div = L.DomUtil.create("div", "legend");
+          div.innerHTML += "<h4>Snow Map</h4>";
+          div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
+          div.innerHTML += '<i style="background: #eb3a34"></i><span>' +
+              '<input type="checkbox" id="clouds" name="clouds" value="clouds" checked onclick=\'handleCloudClick(this);\'>\n' +
+              '  <label for="clouds">clouds</label></span><br>';
+        div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
+          return div;
+        };
+
+        function handleCloudClick(cb) {
+            if (cb.checked) {
+                client.addLayer(noDataLayer)
+            } else {
+                client.removeLayer(noDataLayer)
+            }
+        }
+
+
+        legend.addTo(map);
+
+        L.Control.Watermark = L.Control.extend({
+            onAdd: function(map) {
+
+            var container = L.DomUtil.create("div", "legend");
+            L.DomEvent.disableClickPropagation(container);
+            const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
+            L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
+
+            var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
+                    opacitySlider.type = 'range';
+                    opacitySlider.min = 0;
+                    opacitySlider.max = 100;
+                    opacitySlider.onchange = ((e) => {
+                        client.getLeafletLayer().setOpacity(e.target.value/100.0);
+                console.log('change');
+                    });
+                    opacitySlider.value = 25;
+                opacitySlider.id='opacity';
+            client.getLeafletLayer().setOpacity(0.25);
+
+                return container;
+            },
+
+            onRemove: function(map) {
+                // Nothing to do here
+            }
         });
 
-        client.addLayers([newSnowLayer, newNoDataLayer]);
-
-        snowLayer = newSnowLayer;
-        noDataLayer = newNoDataLayer;
-
-    }
-
-
-    const map = L.map('map').setView([46.3, 7], 10);
-
-    // Adding Voyager Basemap
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
-        maxZoom: 18
-    }).addTo(map);
-
-
-    var client = new carto.Client({
-        apiKey: 'tc_BZnwzfrkWMeMBfkyF3A',
-        username: 'snow',
-        serverUrl: 'https://much-snow.is-very-bad.org/user/snow',
-    });
-
-    values = addBothLayers(1, client);
-
-    client.getLeafletLayer().addTo(map);
-
-    var slider = document.getElementById("opacity");
-
-
-    var lineStyle = {
-    "color": "#ff7800",
-    "weight": 5,
-    "opacity": 0.65
-	};
-
-
-    var gpx = '2020-06-22_207026622_Vouvry-Troistorrents.gpx'; // URL to your GPX file or the GPX itself
-    
-    new L.GPX(gpx, {async: true, style: lineStyle}).on('loaded', function(e) {
-    	  map.fitBounds(e.target.getBounds());
-    	}).addTo(map);
-
-    var gpx2 = '2020-06-22_207024886_Vouvry-Martigny.gpx'; // URL to your GPX file or the GPX itself
-    
-    new L.GPX(gpx2, {async: true}).on('loaded', function(e) {
-    	  map.fitBounds(e.target.getBounds());
-    	}).addTo(map);
-
-    /*Legend specific*/
-    var legend = L.control({ position: "bottomleft" });
-
-    legend.onAdd = function(map) {
-      var div = L.DomUtil.create("div", "legend");
-      div.innerHTML += "<h4>Snow Map</h4>";
-      div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
-      div.innerHTML += '<i style="background: #eb3a34"></i><span>' +
-          '<input type="checkbox" id="clouds" name="clouds" value="clouds" checked onclick=\'handleCloudClick(this);\'>\n' +
-          '  <label for="clouds">clouds</label></span><br>';
-    div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
-      return div;
-    };
-
-    function handleCloudClick(cb) {
-        if (cb.checked) {
-            client.addLayer(noDataLayer)
-        } else {
-            client.removeLayer(noDataLayer)
+        L.control.watermark = function(opts) {
+            return new L.Control.Watermark(opts);
         }
-    }
 
+        L.control.watermark({ position: 'topright' }).addTo(map);
 
-    legend.addTo(map);
+        const popup = L.popup({ closeButton: false });
 
-    L.Control.Watermark = L.Control.extend({
-        onAdd: function(map) {
+        snowLayer.off('featureClicked');
+        snowLayer.on('featureOver', openPopup);
+        snowLayer.on('featureOut', closePopup);
 
-        var container = L.DomUtil.create("div", "legend");
-        L.DomEvent.disableClickPropagation(container);
-        const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
-        L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
+        noDataLayer.off('featureClicked');
+        noDataLayer.on('featureOver', openPopup);
+        noDataLayer.on('featureOut', closePopup);
 
-        var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
-                opacitySlider.type = 'range';
-                opacitySlider.min = 0;
-                opacitySlider.max = 100;
-                opacitySlider.onchange = ((e) => {
-                    client.getLeafletLayer().setOpacity(e.target.value/100.0);
-            console.log('change');
-                });
-                opacitySlider.value = 25;
-            opacitySlider.id='opacity';
-        client.getLeafletLayer().setOpacity(0.25);
-
-            return container;
-        },
-
-        onRemove: function(map) {
-            // Nothing to do here
-        }
-    });
-
-    L.control.watermark = function(opts) {
-        return new L.Control.Watermark(opts);
-    }
-
-    L.control.watermark({ position: 'topright' }).addTo(map);
-
-    const popup = L.popup({ closeButton: false });
-
-    snowLayer.off('featureClicked');
-    snowLayer.on('featureOver', openPopup);
-    snowLayer.on('featureOut', closePopup);
-
-    noDataLayer.off('featureClicked');
-    noDataLayer.on('featureOver', openPopup);
-    noDataLayer.on('featureOut', closePopup);
-
-</script>
+    </script>
 </body>
 </html>
