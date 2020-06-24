@@ -37,6 +37,7 @@
 
 </div>
 
+<script src="popup.js" type="text/javascript"></script>
 <script src="style.js" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
 <script>
@@ -57,10 +58,14 @@
 
     function addBothLayers(opacity, client) {
         const snowStyle = new carto.style.CartoCSS(getSnowStyle(opacity));
-        const newSnowLayer = new carto.layer.Layer(snowDataset, snowStyle);
+        const newSnowLayer = new carto.layer.Layer(snowDataset, snowStyle, {
+            featureOverColumns: ['observation_time']
+        });
 
         const noDataStyle = new carto.style.CartoCSS(getNoDataStyle(opacity));
-        const newNoDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle);
+        const newNoDataLayer = new carto.layer.Layer(noDataDataset, noDataStyle, {
+            featureOverColumns: ['observation_time']
+        });
 
         client.addLayers([newSnowLayer, newNoDataLayer]);
 
@@ -168,6 +173,16 @@
     }
 
     L.control.watermark({ position: 'topright' }).addTo(map);
+
+    const popup = L.popup({ closeButton: false });
+
+    snowLayer.off('featureClicked');
+    snowLayer.on('featureOver', openPopup);
+    snowLayer.on('featureOut', closePopup);
+
+    noDataLayer.off('featureClicked');
+    noDataLayer.on('featureOver', openPopup);
+    noDataLayer.on('featureOut', closePopup);
 
 </script>
 </body>
