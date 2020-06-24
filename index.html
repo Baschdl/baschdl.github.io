@@ -69,10 +69,6 @@
 
     }
 
-    function onChange(opacity, client) {
-	client.getLeafletLayer().setOpacity(opacity);
-    }
-
 
     const map = L.map('map').setView([46.3, 7], 10);
 
@@ -88,15 +84,11 @@
         serverUrl: 'https://much-snow.is-very-bad.org/user/snow',
     });
 
-    values = addBothLayers(0.5, client);
+    values = addBothLayers(1, client);
 
     client.getLeafletLayer().addTo(map);
 
     var slider = document.getElementById("opacity");
-
-    //slider.oninput = function() {
-      //  onChange(this.value/100, client);
-    //}
 
 
     var lineStyle = {
@@ -119,53 +111,63 @@
     	}).addTo(map);
 
     /*Legend specific*/
-var legend = L.control({ position: "bottomleft" });
+    var legend = L.control({ position: "bottomleft" });
 
-legend.onAdd = function(map) {
-  var div = L.DomUtil.create("div", "legend");
-  div.innerHTML += "<h4>Snow Map</h4>";
-  div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
-  div.innerHTML += '<i style="background: #eb3a34"></i><span>Clouds</span><br>';
-div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
-  return div;
-};
+    legend.onAdd = function(map) {
+      var div = L.DomUtil.create("div", "legend");
+      div.innerHTML += "<h4>Snow Map</h4>";
+      div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
+      div.innerHTML += '<i style="background: #eb3a34"></i><span>' +
+          '<input type="checkbox" id="clouds" name="clouds" value="clouds" checked onclick=\'handleCloudClick(this);\'>\n' +
+          '  <label for="clouds">clouds</label></span><br>';
+    div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
+      return div;
+    };
 
-
-legend.addTo(map);
-
-L.Control.Watermark = L.Control.extend({
-    onAdd: function(map) {
-	
-	var container = L.DomUtil.create("div", "legend");
-	L.DomEvent.disableClickPropagation(container);
-	const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
-	L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
-
-	var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
-            opacitySlider.type = 'range';
-            opacitySlider.min = 0;
-            opacitySlider.max = 100;
-            opacitySlider.onchange = ((e) => {
-                client.getLeafletLayer().setOpacity(e.target.value/100.0);
-		console.log('change');
-            });
-            opacitySlider.value = 50;
-		opacitySlider.id='opacity';
-	client.getLeafletLayer().setOpacity(0.5);
-
-        return container;
-    },
-
-    onRemove: function(map) {
-        // Nothing to do here
+    function handleCloudClick(cb) {
+        if (cb.checked) {
+            client.addLayer(noDataLayer)
+        } else {
+            client.removeLayer(noDataLayer)
+        }
     }
-});
 
-L.control.watermark = function(opts) {
-    return new L.Control.Watermark(opts);
-}
 
-L.control.watermark({ position: 'topright' }).addTo(map);
+    legend.addTo(map);
+
+    L.Control.Watermark = L.Control.extend({
+        onAdd: function(map) {
+
+        var container = L.DomUtil.create("div", "legend");
+        L.DomEvent.disableClickPropagation(container);
+        const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
+        L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
+
+        var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
+                opacitySlider.type = 'range';
+                opacitySlider.min = 0;
+                opacitySlider.max = 100;
+                opacitySlider.onchange = ((e) => {
+                    client.getLeafletLayer().setOpacity(e.target.value/100.0);
+            console.log('change');
+                });
+                opacitySlider.value = 25;
+            opacitySlider.id='opacity';
+        client.getLeafletLayer().setOpacity(0.25);
+
+            return container;
+        },
+
+        onRemove: function(map) {
+            // Nothing to do here
+        }
+    });
+
+    L.control.watermark = function(opts) {
+        return new L.Control.Watermark(opts);
+    }
+
+    L.control.watermark({ position: 'topright' }).addTo(map);
 
 </script>
 </body>
