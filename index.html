@@ -13,11 +13,10 @@
         }
     </style>
 
+
     <link rel="stylesheet" href="https://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css"/>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700|Open+Sans:300,400,600" rel="stylesheet">
-    <!-- Include Leaflet -->
-    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
-    <link href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" rel="stylesheet">
+    
     <!-- Include CARTO.js -->
     <script src="https://libs.cartocdn.com/carto.js/v4.2.0/carto.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:600" rel="stylesheet">
@@ -27,10 +26,28 @@
     <link rel="stylesheet" type="text/css" href="./toggle.css"  />
     <!-- Include gpx.js -->
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
-<!-- bootstrap -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+<!-- Include Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <link href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" rel="stylesheet">
+
 </head>
 <body>
+<!--jquery -->
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+<!-- bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!--script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script-->
+
+<!-- bootstrap switch -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap3/bootstrap-switch.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.js"></script>
+
+<!-- leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+
     <div class="content">
         <div id="map">
 
@@ -135,11 +152,56 @@ map.attributionControl.addAttribution('© <a href="https://leafletjs.com" title=
 
         L.Control.Watermark = L.Control.extend({
             onAdd: function(map) {
+		var container1 = L.DomUtil.create("div", "legend");
+            var container = L.DomUtil.create("div", "bootstrap-card",container1);
 
-            var container = L.DomUtil.create("div", "legend");
-container.innerHTML += "<h4>Snow Map</h4>";
+container.innerHTML += "<h4>Legend</h4>";
             L.DomEvent.disableClickPropagation(container);
-	    // opacity slider
+	    
+	     // legend items
+ 	 var square=	L.DomUtil.create("i", null, container);
+	square.style = "background: #00d0ff";
+	var label =	L.DomUtil.create("span", null, container);
+	label.innerHTML += "Snow";
+	L.DomUtil.create("br",null,container);
+	var s2 = L.DomUtil.create("i",null,container);
+	s2.style = "background: #eb3a34";
+
+	
+	
+	var actualLabel = L.DomUtil.create('span',null,container);
+	actualLabel.innerHTML = 'Clouds';
+	var label2 =	L.DomUtil.create("span", null, container);
+ 	var snowlayercheck =	L.DomUtil.create("input","clouds",label2);
+	snowlayercheck.type = 'checkbox';
+	snowlayercheck.name = 'clouds';
+	snowlayercheck.value = 'clouds';
+	snowlayercheck.checked=true;
+	snowlayercheck.onclick = ((e) => {handleCloudClick(e);});
+	
+	L.DomUtil.create('br',null,container);
+container.innerHTML += "<h4>Control</h4>";
+	var mode_switcher = L.DomUtil.create('div',"custom-control custom-switch",container);
+	var text_left = L.DomUtil.create('span',null,mode_switcher);
+	text_left.innerHTML += 'Last  satellite pass &nbsp;&nbsp;';
+	var slider = L.DomUtil.create('input',"custom-control-input", mode_switcher);
+	slider.type = 'checkbox';
+	slider.id='customSwitch1';
+	jQuery(slider).bootstrapSwitch({
+      // http://bootstrapswitch.site/options.html
+		size: 'mini',
+onText:'«',
+offText:'»',animate:false,
+offColor: 'primary',
+      onSwitchChange: function(event) {
+        console.log('buttonClicked', event.target.checked);
+      }
+    });
+	var text_right = L.DomUtil.create('span',null,mode_switcher);
+	text_right.innerHTML += '&nbsp;&nbsp;Last two weeks';
+
+
+// opacity slider
             const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
             L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
             var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
@@ -153,40 +215,9 @@ container.innerHTML += "<h4>Snow Map</h4>";
                     opacitySlider.value = 25;
                 opacitySlider.id='opacity';
             client.getLeafletLayer().setOpacity(0.25);
-	     // legend items
- 	 var square=	L.DomUtil.create("i", null, container);
-	square.style = "background: #00d0ff";
-	var label =	L.DomUtil.create("span", null, container);
-	label.innerHTML += "Snow";
-	L.DomUtil.create("br",null,container);
-	var s2 = L.DomUtil.create("i",null,container);
-	s2.style = "background: #eb3a34";
-	
-	var actualLabel = L.DomUtil.create('span',null,container);
-	actualLabel.innerHTML = 'Clouds';
-	var label2 =	L.DomUtil.create("span", null, container);
- 	var snowlayercheck =	L.DomUtil.create("input","clouds",label2);
-	snowlayercheck.type = 'checkbox';
-	snowlayercheck.name = 'clouds';
-	snowlayercheck.value = 'clouds';
-	snowlayercheck.checked=true;
-	snowlayercheck.onclick = ((e) => {handleCloudClick(e);});
-	
-	L.DomUtil.create('br',null,container);
-	var spp = L.DomUtil.create('span',null,container);
-	var mode_switcher = L.DomUtil.create('div','slider2Wrapper',spp);
-	var text_left = L.DomUtil.create('div',null,mode_switcher);
-	text_left.innerHTML += 'Last image&nbsp;&nbsp;';
-	var input_slider = L.DomUtil.create('label', 'switch2', mode_switcher);
-	var slider = L.DomUtil.create('input',null, input_slider);
-	slider.name = "data_mqde";
-	slider.type = 'checkbox';
-	var spanspan = L.DomUtil.create('span','slider2',input_slider);
-	var text_right = L.DomUtil.create('div',null,mode_switcher);
-	text_right.innerHTML += '&nbsp;&nbsp;Last two weeks';
 		
 
-                return container;
+                return container1;
             },
 
             onRemove: function(map) {
@@ -231,6 +262,6 @@ console.log(L.geoJson);
     }).addTo(map);
 
 
-    </script>
+   </script>
 </body>
 </html>
