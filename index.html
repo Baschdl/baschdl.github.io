@@ -125,6 +125,15 @@
           div.innerHTML += '<i style="background: #eb3a34"></i><span>' +
               '<input type="checkbox" id="clouds" name="clouds" value="clouds" checked onclick=\'handleCloudClick(this);\'>\n' +
               '  <label for="clouds">clouds</label></span><br>';
+          div.innerHTML +=
+              '<div class="sliderWrapper">\n' +
+              '        <div>Last image&nbsp;&nbsp;</div>\n' +
+              '        <label class="switch">\n' +
+              '            <input type="checkbox" name="data_mpde">\n' +
+              '            <span class="slider"></span>\n' +
+              '        </label>\n' +
+              '        <div>&nbsp;&nbsp;Last two weeks</div>\n' +
+              '</div><br>'
         div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
           return div;
         };
