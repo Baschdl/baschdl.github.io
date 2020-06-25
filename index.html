@@ -39,6 +39,8 @@
 
     <script src="popup.js" type="text/javascript"></script>
     <script src="style.js" type="text/javascript"></script>
+<script src='togeojson.js'></script>
+<script src="leaflet.filelayer.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
     <script>
 
@@ -76,6 +78,8 @@
 
 
         const map = L.map('map').setView([46.3, 7], 10);
+	map.attributionControl.setPrefix('<a href="/about_us.html">About us</a>');
+map.attributionControl.addAttribution('© <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
 
         // Adding Voyager Basemap
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
@@ -103,60 +107,41 @@
         };
 
 
-        var gpx = '2020-06-22_207026622_Vouvry-Troistorrents.gpx'; // URL to your GPX file or the GPX itself
+	// maybe this is useful later on
+        //var gpx = '2020-06-22_207026622_Vouvry-Troistorrents.gpx'; // URL to your GPX file or the GPX itself
 
-        new L.GPX(gpx, {async: true, style: lineStyle}).on('loaded', function(e) {
-              map.fitBounds(e.target.getBounds());
-            }).addTo(map);
+        //new L.GPX(gpx, {async: true, style: lineStyle}).on('loaded', function(e) {
+         //     map.fitBounds(e.target.getBounds());
+          //  }).addTo(map);
 
-        var gpx2 = '2020-06-22_207024886_Vouvry-Martigny.gpx'; // URL to your GPX file or the GPX itself
+        //var gpx2 = '2020-06-22_207024886_Vouvry-Martigny.gpx'; // URL to your GPX file or the GPX itself
 
-        new L.GPX(gpx2, {async: true}).on('loaded', function(e) {
-              map.fitBounds(e.target.getBounds());
-            }).addTo(map);
+      //  new L.GPX(gpx2, {async: true}).on('loaded', function(e) {
+        //      map.fitBounds(e.target.getBounds());
+          //  }).addTo(map);
 
         /*Legend specific*/
-        var legend = L.control({ position: "bottomleft" });
-
-        legend.onAdd = function(map) {
-          var div = L.DomUtil.create("div", "legend");
-          div.innerHTML += "<h4>Snow Map</h4>";
-          div.innerHTML += '<i style="background: #00d0ff"></i><span>Snow</span><br>';
-          div.innerHTML += '<i style="background: #eb3a34"></i><span>' +
-              '<input type="checkbox" id="clouds" name="clouds" value="clouds" checked onclick=\'handleCloudClick(this);\'>\n' +
-              '  <label for="clouds">clouds</label></span><br>';
-          div.innerHTML +=
-              '<div class="sliderWrapper">\n' +
-              '        <div>Last image&nbsp;&nbsp;</div>\n' +
-              '        <label class="switch">\n' +
-              '            <input type="checkbox" name="data_mpde">\n' +
-              '            <span class="slider"></span>\n' +
-              '        </label>\n' +
-              '        <div>&nbsp;&nbsp;Last two weeks</div>\n' +
-              '</div><br>'
-        div.innerHTML += '<i class="icon" style="background-image: GitHub-Mark-64px.png;background-repeat: no-repeat;"></i><span> <a href="https://github.com/Baschdl/baschdl.github.io">github</a></span><br>';
-          return div;
-        };
-
         function handleCloudClick(cb) {
-            if (cb.checked) {
+		console.log(cb);
+            if (cb.explicitOriginalTarget.checked) {
+		console.log('checked');
                 client.addLayer(noDataLayer)
             } else {
+		console.log('not checked');
                 client.removeLayer(noDataLayer)
             }
         }
 
 
-        legend.addTo(map);
-
         L.Control.Watermark = L.Control.extend({
             onAdd: function(map) {
 
             var container = L.DomUtil.create("div", "legend");
+container.innerHTML += "<h4>Snow Map</h4>";
             L.DomEvent.disableClickPropagation(container);
+	    // opacity slider
             const opacityController = L.DomUtil.create('span', 'opacity-slider', container);
             L.DomUtil.create('span', 'slider-label', opacityController).innerHTML = 'Transparency';
-
             var opacitySlider = L.DomUtil.create('input', 'slider', opacityController);
                     opacitySlider.type = 'range';
                     opacitySlider.min = 0;
@@ -168,6 +153,38 @@
                     opacitySlider.value = 25;
                 opacitySlider.id='opacity';
             client.getLeafletLayer().setOpacity(0.25);
+	     // legend items
+ 	 var square=	L.DomUtil.create("i", null, container);
+	square.style = "background: #00d0ff";
+	var label =	L.DomUtil.create("span", null, container);
+	label.innerHTML += "Snow";
+	L.DomUtil.create("br",null,container);
+	var s2 = L.DomUtil.create("i",null,container);
+	s2.style = "background: #eb3a34";
+	
+	var actualLabel = L.DomUtil.create('span',null,container);
+	actualLabel.innerHTML = 'Clouds';
+	var label2 =	L.DomUtil.create("span", null, container);
+ 	var snowlayercheck =	L.DomUtil.create("input","clouds",label2);
+	snowlayercheck.type = 'checkbox';
+	snowlayercheck.name = 'clouds';
+	snowlayercheck.value = 'clouds';
+	snowlayercheck.checked=true;
+	snowlayercheck.onclick = ((e) => {handleCloudClick(e);});
+	
+	L.DomUtil.create('br',null,container);
+	var spp = L.DomUtil.create('span',null,container);
+	var mode_switcher = L.DomUtil.create('div','slider2Wrapper',spp);
+	var text_left = L.DomUtil.create('div',null,mode_switcher);
+	text_left.innerHTML += 'Last image&nbsp;&nbsp;';
+	var input_slider = L.DomUtil.create('label', 'switch2', mode_switcher);
+	var slider = L.DomUtil.create('input',null, input_slider);
+	slider.name = "data_mqde";
+	slider.type = 'checkbox';
+	var spanspan = L.DomUtil.create('span','slider2',input_slider);
+	var text_right = L.DomUtil.create('div',null,mode_switcher);
+	text_right.innerHTML += '&nbsp;&nbsp;Last two weeks';
+		
 
                 return container;
             },
@@ -192,6 +209,27 @@
         noDataLayer.off('featureClicked');
         noDataLayer.on('featureOver', openPopup);
         noDataLayer.on('featureOut', closePopup);
+	
+console.log(L.geoJson);
+
+	 L.Control.fileLayerLoad({
+        // Allows you to use a customized version of L.geoJson.
+        // For example if you are using the Proj4Leaflet leaflet plugin,
+        // you can pass L.Proj.geoJson and load the files into the
+        // L.Proj.GeoJson instead of the L.geoJson.
+        layer: L.geoJson,
+        // See http://leafletjs.com/reference.html#geojson-options
+        layerOptions: {style: {color:'red'}},
+        // Add to map after loading (default: true) ?
+        addToMap: true,
+        // File size limit in kb (default: 1024) ?
+        fileSizeLimit: 1024,
+        // Restrict accepted file formats (default: .geojson, .json, .kml, and .gpx) ?
+        formats: [
+            '.gpx'
+        ]
+    }).addTo(map);
+
 
     </script>
 </body>
