@@ -40,18 +40,26 @@
     <script src="popup.js" type="text/javascript"></script>
     <script src="style.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.4.0/gpx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
     <script>
 
 
         const dataset = `snow`;
 
+        const tomorrow = new moment().hours(0).minutes(0).seconds(0).add(1, 'days').toDate();
+        const two_weeks_ago = new moment().hours(0).minutes(0).seconds(0).subtract(14, 'days').toDate();
+
+        const timeFilter = new carto.filter.Range('observation_time', {gte: two_weeks_ago, lte: tomorrow});
+
         const snowDataset = new carto.source.Dataset(dataset);
         const snowFilter = new carto.filter.Range('dn', {lte: 100, gte: 100});
-        snowDataset.addFilter(snowFilter);
+        const combinedSnowFilter = new carto.filter.AND([snowFilter, timeFilter]);
+        snowDataset.addFilter(combinedSnowFilter);
 
         const noDataDataset = new carto.source.Dataset(dataset);
         const noDataFilter = new carto.filter.Range('dn', {lte: 205, gte: 205});
-        noDataDataset.addFilter(noDataFilter);
+        const combinedNoDataFilter = new carto.filter.AND([noDataFilter, timeFilter]);
+        noDataDataset.addFilter(combinedNoDataFilter);
 
         var snowLayer;
         var noDataLayer;
