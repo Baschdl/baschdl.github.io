@@ -1,11 +1,8 @@
-const tomorrow = new moment().hours(0).minutes(0).seconds(0).add(1, 'days').toDate();
 const two_weeks_ago = new moment().hours(0).minutes(0).seconds(0).subtract(14, 'days').toDate();
 
-const timeFilter = new carto.filter.Range('observation_time', {gte: two_weeks_ago, lte: tomorrow});
-
 const all_query = 'SELECT cartodb_id, the_geom, the_geom_webmercator, dn, ' +
-    'to_char(observation_time, \'YYYY-MM-DD\') as observation_time,' +
-    'product_id, tile_id from snow';
+    'to_char(observation_time, \'YYYY-MM-DD\') as observation_time, product_id, tile_id ' +
+    'FROM snow WHERE observation_time >= ' + two_weeks_ago;
 
 const recent_query =
     'SELECT cartodb_id, the_geom, the_geom_webmercator, dn, to_char(observation_time, \'YYYY-MM-DD\') as observation_time, product_id, tile_id ' +
@@ -18,9 +15,8 @@ const snowDataset = new carto.source.SQL(all_query);
 const snowRecentDataset = new carto.source.SQL(recent_query);
 
 const snowFilter = new carto.filter.Range('dn', {lte: 100, gte: 100});
-const combinedSnowFilter = new carto.filter.AND([snowFilter, timeFilter]);
 
-snowDataset.addFilter(combinedSnowFilter);
+snowDataset.addFilter(snowFilter);
 snowRecentDataset.addFilter(snowFilter);
 
 // --- No Data ---
@@ -29,9 +25,8 @@ const noDataDataset = new carto.source.SQL(all_query);
 const noDataRecentDataset = new carto.source.SQL(recent_query);
 
 const noDataFilter = new carto.filter.Range('dn', {lte: 205, gte: 205});
-const combinedNoDataFilter = new carto.filter.AND([noDataFilter, timeFilter]);
 
-noDataDataset.addFilter(combinedNoDataFilter);
+noDataDataset.addFilter(noDataFilter);
 noDataRecentDataset.addFilter(noDataFilter);
 
 const snowStyle = new carto.style.CartoCSS(getSnowStyle(1));
