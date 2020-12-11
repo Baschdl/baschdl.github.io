@@ -54,15 +54,21 @@ var map = new mapboxgl.Map({
             // ST_AsMVT() uses 'default' as layer name
             'source-layer': 'default',
             'minzoom': 0,
-            'maxzoom': 22,
+            'maxzoom': 15,
             'paint': {
-                property: “dn”,
-                stops: [[0, “#d7191c”], [110, “#fdae61”], [150, “#ffffbf”], [250, “#a6d96a”]],
-                type: “interval”
-              },
-            "fill-outline-color": "rgba(37,37,37,0.5)"
-        }
-    }
+                "fill-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["get", "dn"],
+                    100,
+                    "hsl(179, 96%, 74%)",
+                    205,
+                    "hsla(0, 3%, 95%, 0.7)",
+                    254,
+                    "hsla(0, 3%, 95%, 0)"
+                ]
+            }           
+    
         }]
     }
 });
