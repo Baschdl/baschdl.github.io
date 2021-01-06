@@ -48,11 +48,11 @@ var map = new mapboxgl.Map({
             'minzoom': 0,
             'maxzoom': 22
         },{
-            'id': 'postgis-tiles-layer',
+            'id': 'public.snow_db',
             'type': 'fill', //line
             'source': 'postgis-tiles',
             // ST_AsMVT() uses 'default' as layer name
-            'source-layer': 'default',
+            'source-layer': 'public.snow_db',
             'minzoom': 0,
             'maxzoom': 15,
             'paint': {
