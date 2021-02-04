@@ -1,0 +1,64 @@
+ 
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Mapbox GL JS Examples</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZnJlcmVmcmUiLCJhIjoiY2trcjkyN3lmMDFkaTJxcDZ2N2ZvY3hkZyJ9.NYXtgKcY3IC5rLup-HyweA';
+
+var map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/outdoors-v11',
+zoom: 5,
+'center': [10, 45],
+});
+map.on('load', function () {
+map.addSource('postgis-tiles',{
+ 'type': 'vector',
+                'tiles': [
+                    "https://much-snow.is-very-bad.org/public.snow_db/{z}/{x}/{y}.pbf"
+                ]
+});
+
+map.addLayer({
+            'id': 'public.snow_db',
+            'type': 'fill', //line
+            'source': 'postgis-tiles',
+            // ST_AsMVT() uses 'default' as layer name
+            'source-layer': 'public.snow_db',
+            'minzoom': 0,
+            'maxzoom': 15,
+            'paint': {
+                "fill-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["get", "dn"],
+                    100,
+                    "hsl(179, 96%, 74%)",
+                    205,
+                    "hsla(0, 3%, 95%, 0)",
+                    254,
+                    "hsla(0, 3%, 95%, 0)"
+                ]
+            }           
+    
+    });
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+</script>
+
+</body>
+</html>
