@@ -88,6 +88,22 @@ zoom: 5,
 'center': [10, 45],
 });
 map.on('load', function () {
+
+var layers = map.getStyle().layers;
+// Find the index of the first symbol layer in the map style
+var firstSymbolId;
+for (var i = 0; i < layers.length; i++) {
+    console.log(i);
+    console.log(layers[i].type);
+if (layers[i].type === 'symbol') {
+firstSymbolId = layers[i].id;
+break;
+}
+}
+
+console.log(layers);
+console.log(firstSymbolId);
+
 map.addSource('postgis-tiles',{
  'type': 'vector',
                 'tiles': [
@@ -115,9 +131,9 @@ map.addLayer({
                     254,
                     "hsla(0, 3%, 95%, 0)"
                 ]
-            }           
-    
-    });
+            }
+    },
+firstSymbolId);
 
 map.addLayer({
             'id': 'public.snow_db.cloud',
