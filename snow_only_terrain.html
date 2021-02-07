@@ -95,7 +95,7 @@ var firstSymbolId;
 for (var i = 0; i < layers.length; i++) {
     console.log(i);
     console.log(layers[i].type);
-if (layers[i].type === 'symbol') {
+if (layers[i].id === 'water') {
 firstSymbolId = layers[i].id;
 break;
 }
