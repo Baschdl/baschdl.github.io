@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'/>
+    <title>Mapbox GL JS Examples</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet'/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<style>
+    .map-overlay {
+        font: bold 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        position: absolute;
+        width: 25%;
+        top: 0;
+        left: 0;
+        padding: 10px;
+    }
+
+    .map-overlay .map-overlay-inner {
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .map-overlay label {
+        display: block;
+        margin: 0 0 10px;
+    }
+
+    .map-overlay input {
+        background-color: transparent;
+        display: inline-block;
+        width: 100%;
+        position: relative;
+        margin: 0;
+        cursor: ew-resize;
+    }
+
+    .map-overlay-inner fieldset {
+        border: none;
+        padding: 0;
+        margin: 0 0 10px;
+    }
+
+    .map-overlay-inner fieldset:last-child {
+        margin: 0;
+    }
+
+    .map-overlay-inner select {
+        width: 100%;
+    }
+
+    .map-overlay-inner label {
+        display: block;
+        font-weight: bold;
+        margin: 0 0 5px;
+    }
+
+    .map-overlay-inner button {
+        display: inline-block;
+        width: 15px;
+        height: 20px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .map-overlay-inner button:focus {
+        outline: none;
+    }
+
+    .map-overlay-inner button:hover {
+        box-shadow: inset 0 0 0 3px rgba(255, 0, 0, 0.5);
+    }
+
+</style>
+
+<div id='map'></div>
+
+<div class="map-overlay top">
+    <div class="map-overlay-inner">
+        <label>Snow opacity: <span id="snow-slider-value">100%</span></label>
+        <input
+                id="snow-slider"
+                type="range"
+                min="0"
+                max="100"
+                step="0"
+                value="100"
+        />
+        <label>Cloud opacity: <span id="cloud-slider-value">6%</span></label>
+        <input
+                id="cloud-slider"
+                type="range"
+                min="0"
+                max="100"
+                step="0"
+                value="6"
+        />
+        <label>View data from the last <span id="day-slider-value">14</span> day(s).</label>
+        <input
+                id="day-slider"
+                type="range"
+                min="1"
+                max="14"
+                step="1"
+                value="14"
+        />
+        You are viewing data from the (XXX-XXX).
+        <br>
+        Show dates <input type="checkbox" id="time-style">.<br>
+        Legend
+        <fieldset>
+            0<div id="date-viewer"></div>
+            14
+        </fieldset>
+
+    </div>
+</div>
+
+
+<script>
+    // example for buttons on overlay
+    // https://docs.mapbox.com/mapbox-gl-js/example/color-switcher/
+
+    // example for popup
+    // https://docs.mapbox.com/mapbox-gl-js/example/filter-features-within-map-view/
+
+    // example for hover
+    // https://docs.mapbox.com/mapbox-gl-js/example/hover-styles/
+
+    // todo: loading icon
+    // https://github.com/mapbox/mapbox-gl-js/issues/6178
+
+    var cloud_slider = document.getElementById('cloud-slider');
+    var cloud_sliderValue = document.getElementById('cloud-slider-value');
+
+    var day_slider = document.getElementById('day-slider');
+    var day_sliderValue = document.getElementById('day-slider-value');
+
+    var time_style_checkbox = document.getElementById('time-style');
+    var date_viewer = document.getElementById('date-viewer');
+
+    var snow_slider = document.getElementById('snow-slider');
+    var snow_sliderValue = document.getElementById('snow-slider-value');
+
+    var now = new Date();
+    console.log(now);
+    var now_in_days = Math.floor(now / 8.64e7);
+    console.log(now_in_days);
+
+    var snow_fill_style = ["interpolate",
+        ["linear"],
+        ["get", "dn"],
+        100,
+        "hsl(206,76%,52%)",
+        205,
+        "hsla(0, 3%, 95%, 0)",
+        254,
+        "hsla(0, 3%, 95%, 0)"
+    ];
+    var colors = [];
+    for (day = 0; day < 14; day++) {
+        var color = "hsl(" + (53 + 70 / 14 * (14 - day)) + ",75%,50%)";
+        colors.push([day, color]);
+    }
+    console.log(colors);
+
+    var time_fill_style = ["case",
+        // if its snow and the number of days is
+        ['<', ["get", "dn"], 101],
+        ["interpolate",
+            ["linear"],
+            ['-', now_in_days, ["get", "datediff"]],
+            // below was computed ;)
+
+                0,
+                "hsl(123,75%,50%)"
+            ,
+
+                1,
+                "hsl(118,75%,50%)"
+            ,
+
+                2,
+                "hsl(113,75%,50%)"
+            ,
+
+                3,
+                "hsl(108,75%,50%)"
+            ,
+
+                4,
+                "hsl(103,75%,50%)"
+            ,
+
+                5,
+                "hsl(98,75%,50%)"
+            ,
+
+                6,
+                "hsl(93,75%,50%)"
+            ,
+
+                7,
+                "hsl(88,75%,50%)"
+            ,
+
+                8,
+                "hsl(83,75%,50%)"
+            ,
+
+                9,
+                "hsl(78,75%,50%)"
+            ,
+
+                10,
+                "hsl(73,75%,50%)"
+            ,
+
+                11,
+                "hsl(68,75%,50%)"
+            ,
+
+                12,
+                "hsl(63,75%,50%)"
+            ,
+
+                13,
+                "hsl(58,75%,50%)"
+
+
+        ],
+        // else:
+        "hsla(0, 3%, 95%, 0)"
+    ]
+
+    var time_outline_style_cloud = ["case",
+        // if its snow and the number of days is
+        ['>', ["get", "dn"], 101],
+        ["interpolate",
+            ["linear"],
+            ['-', now_in_days, ["get", "datediff"]],
+            // below was computed ;)
+
+                0,
+                "hsl(123,75%,50%)"
+            ,
+
+                1,
+                "hsl(118,75%,50%)"
+            ,
+
+                2,
+                "hsl(113,75%,50%)"
+            ,
+
+                3,
+                "hsl(108,75%,50%)"
+            ,
+
+                4,
+                "hsl(103,75%,50%)"
+            ,
+
+                5,
+                "hsl(98,75%,50%)"
+            ,
+
+                6,
+                "hsl(93,75%,50%)"
+            ,
+
+                7,
+                "hsl(88,75%,50%)"
+            ,
+
+                8,
+                "hsl(83,75%,50%)"
+            ,
+
+                9,
+                "hsl(78,75%,50%)"
+            ,
+
+                10,
+                "hsl(73,75%,50%)"
+            ,
+
+                11,
+                "hsl(68,75%,50%)"
+            ,
+
+                12,
+                "hsl(63,75%,50%)"
+            ,
+
+                13,
+                "hsl(58,75%,50%)"
+
+
+        ],
+        // else:
+        "hsla(0, 3%, 95%, 0)"
+    ]
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZnJlcmVmcmUiLCJhIjoiY2trcjkyN3lmMDFkaTJxcDZ2N2ZvY3hkZyJ9.NYXtgKcY3IC5rLup-HyweA';
+
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/outdoors-v11',
+        zoom: 5,
+        center: [10, 45],
+        attributionControl: false,
+
+    });
+
+
+    map.on('load', function () {
+
+        var layers = map.getStyle().layers;
+// Find the index of the first symbol layer in the map style
+        var firstSymbolId;
+        for (var i = 0; i < layers.length; i++) {
+            console.log(i);
+            console.log(layers[i].type);
+            if (layers[i].id === 'water') {
+                firstSymbolId = layers[i].id;
+                break;
+            }
+        }
+
+
+        map.addSource('postgis-tiles', {
+            'type': 'vector',
+            'tiles': [
+                //"https://much-snow.is-very-bad.org/public.snow_db/{z}/{x}/{y}.pbf"
+                "https://much-snow.is-very-bad.org/rpc/public.snow_function_source/{z}/{x}/{y}.pbf"
+            ]
+        });
+
+        console.log(map.getSource('postgis-tiles'));
+
+        var sourceLayer = 'public.snow_function_source';
+
+        map.addLayer({
+                'id': 'public.snow_db.snow',
+                'type': 'fill', //line
+                'source': 'postgis-tiles',
+                // ST_AsMVT() uses 'default' as layer name
+                'source-layer': sourceLayer, // todo change here!
+                'minzoom': 0,
+                'maxzoom': 15,
+                'paint': {
+                    "fill-opacity": 1,
+                    "fill-color": snow_fill_style
+
+                }
+            },
+            firstSymbolId
+        )
+        ;
+
+
+        map.addLayer({
+            'id': 'public.snow_db.cloud',
+            'type': 'fill', //line
+            'source': 'postgis-tiles',
+            // ST_AsMVT() uses 'default' as layer name
+            'source-layer': sourceLayer,
+            'minzoom': 0,
+            'maxzoom': 15,
+            'paint': {
+                "fill-opacity": 0.06,
+                "fill-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["get", "dn"],
+                    100,
+                    "hsla(179, 96%, 74%, 0)",
+                    205,
+                    "hsl(341, 100%, 50%)",
+                    254,
+                    "hsla(0, 3%, 95%, 0)"
+                ]
+            }
+
+        });
+        var day;
+        for (day = 0; day < 14; day++) {
+            var color = "hsl(" + (53 + 70 / 14 * (14 - day)) + ",75%,50%)";
+            var show_dates = document.createElement('button');
+            show_dates.style.backgroundColor = color;
+            show_dates.addEventListener('click', function () {
+                console.log(day);
+            });
+            date_viewer.appendChild(show_dates);
+
+        }
+        console.log(layers);
+
+        map.on('mousemove', 'public.snow_db.snow', function (e) {
+            if (e.features.length > 0) {
+                console.log(e.features);
+            }
+        });
+
+
+        snow_slider.addEventListener('input', function (e) {
+            map.setPaintProperty(
+                'public.snow_db.snow',
+                'fill-opacity',
+                parseInt(e.target.value, 10) / 100
+            );
+
+            // Value indicator
+            snow_sliderValue.textContent = e.target.value + '%';
+        });
+
+        cloud_slider.addEventListener('input', function (e) {
+            map.setPaintProperty(
+                'public.snow_db.cloud',
+                'fill-opacity',
+                parseInt(e.target.value, 10) / 100
+            );
+
+            // Value indicator
+            cloud_sliderValue.textContent = e.target.value + '%';
+        });
+
+        cloud_slider.addEventListener('input', function (e) {
+            map.setPaintProperty(
+                'public.snow_db.cloud',
+                'fill-opacity',
+                parseInt(e.target.value, 10) / 100
+            );
+
+            // Value indicator
+            cloud_sliderValue.textContent = e.target.value + '%';
+        });
+
+        time_style_checkbox.addEventListener('input', function (e) {
+                if (this.checked) {
+                    map.setPaintProperty(
+                        'public.snow_db.snow',
+                        'fill-color',
+                        time_fill_style
+                    );
+                    map.setPaintProperty(
+                        'public.snow_db.cloud',
+                        'fill-outline-color',
+                        time_outline_style_cloud
+                    );
+                } else {
+                    map.setPaintProperty(
+                        'public.snow_db.snow',
+                        'fill-color',
+                        snow_fill_style
+                    );
+                    map.setPaintProperty(
+                        'public.snow_db.cloud',
+                        'fill-outline-color',
+                        null
+                    );
+                }
+            }
+        )
+
+        day_slider.addEventListener('input', function (e) {
+            map.setFilter(
+                'public.snow_db.cloud',
+                [">=", ["get", "datediff"], now_in_days - e.target.value]
+            )
+            map.setFilter(
+                'public.snow_db.snow',
+                [">=", ["get", "datediff"], now_in_days - e.target.value]
+            )
+
+            // Value indicator
+            day_sliderValue.textContent = e.target.value + '';
+        });
+    });
+    map.addControl(new mapboxgl.AttributionControl({'customAttribution': '<a href="/about_us.html">About us</a> | <a href="/about_us.html#imprint">Imprint</a>'}))
+    map.addControl(new mapboxgl.NavigationControl());
+</script>
+
+</body>
+</html>
