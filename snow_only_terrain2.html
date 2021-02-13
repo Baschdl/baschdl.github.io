@@ -39,6 +39,20 @@
         margin-bottom: 10px;
     }
 
+    .loading-container {
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+    }
+
+    .loading-background {
+        background-color: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+
+
     .map-overlay label {
         display: block;
         margin: 0 0 10px;
@@ -79,6 +93,26 @@
         height: 20px;
         border: none;
         cursor: pointer;
+    }
+
+    .loader {
+        border: 4px solid #2891e2;
+        border-radius: 50%;
+        border-top: 4px solid #010910;
+        width: 10px;
+        height: 10px;
+        -webkit-animation: spin 1s linear infinite; /* Safari */
+        animation: spin 1s linear infinite;
+    }
+
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .map-overlay-inner button:focus {
@@ -127,7 +161,8 @@
         Show dates <input type="checkbox" id="time-style">.<br>
         Legend
         <fieldset>
-            0<div id="date-viewer"></div>
+            0
+            <div id="date-viewer"></div>
             14
         </fieldset>
 
@@ -136,6 +171,8 @@
 
 
 <script>
+
+
     // example for buttons on overlay
     // https://docs.mapbox.com/mapbox-gl-js/example/color-switcher/
 
@@ -170,6 +207,7 @@
         ["get", "dn"],
         100,
         "hsl(206,76%,52%)",
+        // do not render clouds at all
         205,
         "hsla(0, 3%, 95%, 0)",
         254,
@@ -180,7 +218,7 @@
         var color = "hsl(" + (53 + 70 / 14 * (14 - day)) + ",75%,50%)";
         colors.push([day, color]);
     }
-    console.log(colors);
+
 
     var time_fill_style = ["case",
         // if its snow and the number of days is
@@ -190,61 +228,60 @@
             ['-', now_in_days, ["get", "datediff"]],
             // below was computed ;)
 
-                0,
-                "hsl(123,75%,50%)"
+            0,
+            "hsl(123,75%,50%)"
             ,
 
-                1,
-                "hsl(118,75%,50%)"
+            1,
+            "hsl(118,75%,50%)"
             ,
 
-                2,
-                "hsl(113,75%,50%)"
+            2,
+            "hsl(113,75%,50%)"
             ,
 
-                3,
-                "hsl(108,75%,50%)"
+            3,
+            "hsl(108,75%,50%)"
             ,
 
-                4,
-                "hsl(103,75%,50%)"
+            4,
+            "hsl(103,75%,50%)"
             ,
 
-                5,
-                "hsl(98,75%,50%)"
+            5,
+            "hsl(98,75%,50%)"
             ,
 
-                6,
-                "hsl(93,75%,50%)"
+            6,
+            "hsl(93,75%,50%)"
             ,
 
-                7,
-                "hsl(88,75%,50%)"
+            7,
+            "hsl(88,75%,50%)"
             ,
 
-                8,
-                "hsl(83,75%,50%)"
+            8,
+            "hsl(83,75%,50%)"
             ,
 
-                9,
-                "hsl(78,75%,50%)"
+            9,
+            "hsl(78,75%,50%)"
             ,
 
-                10,
-                "hsl(73,75%,50%)"
+            10,
+            "hsl(73,75%,50%)"
             ,
 
-                11,
-                "hsl(68,75%,50%)"
+            11,
+            "hsl(68,75%,50%)"
             ,
 
-                12,
-                "hsl(63,75%,50%)"
+            12,
+            "hsl(63,75%,50%)"
             ,
 
-                13,
-                "hsl(58,75%,50%)"
-
+            13,
+            "hsl(58,75%,50%)"
 
         ],
         // else:
@@ -258,61 +295,60 @@
             ["linear"],
             ['-', now_in_days, ["get", "datediff"]],
             // below was computed ;)
-
-                0,
-                "hsl(123,75%,50%)"
+            0,
+            "hsl(123,75%,50%)"
             ,
 
-                1,
-                "hsl(118,75%,50%)"
+            1,
+            "hsl(118,75%,50%)"
             ,
 
-                2,
-                "hsl(113,75%,50%)"
+            2,
+            "hsl(113,75%,50%)"
             ,
 
-                3,
-                "hsl(108,75%,50%)"
+            3,
+            "hsl(108,75%,50%)"
             ,
 
-                4,
-                "hsl(103,75%,50%)"
+            4,
+            "hsl(103,75%,50%)"
             ,
 
-                5,
-                "hsl(98,75%,50%)"
+            5,
+            "hsl(98,75%,50%)"
             ,
 
-                6,
-                "hsl(93,75%,50%)"
+            6,
+            "hsl(93,75%,50%)"
             ,
 
-                7,
-                "hsl(88,75%,50%)"
+            7,
+            "hsl(88,75%,50%)"
             ,
 
-                8,
-                "hsl(83,75%,50%)"
+            8,
+            "hsl(83,75%,50%)"
             ,
 
-                9,
-                "hsl(78,75%,50%)"
+            9,
+            "hsl(78,75%,50%)"
             ,
 
-                10,
-                "hsl(73,75%,50%)"
+            10,
+            "hsl(73,75%,50%)"
             ,
 
-                11,
-                "hsl(68,75%,50%)"
+            11,
+            "hsl(68,75%,50%)"
             ,
 
-                12,
-                "hsl(63,75%,50%)"
+            12,
+            "hsl(63,75%,50%)"
             ,
 
-                13,
-                "hsl(58,75%,50%)"
+            13,
+            "hsl(58,75%,50%)"
 
 
         ],
@@ -330,6 +366,39 @@
         center: [10, 45],
         attributionControl: false,
 
+    });
+    class LoaderControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'loading-container';
+            this._loader_backgr = document.createElement('div');
+            this._loader_backgr.className = 'loading-background';
+            this._loader = document.createElement('div');
+            this._loader.className = 'loader';
+            //this._loader.style = 'display: inline'
+            this._loader_backgr.appendChild(this._loader);
+            this._container.appendChild(this._loader_backgr);
+            this._loader_backgr.innerHTML += " Loading...";
+            console.log("Addded");
+            return this._container;
+        }
+
+        onRemove() {
+            this._container.remove();
+            this._map = undefined;
+        }
+    }
+    var loader_ctrl = new LoaderControl();
+    var loader_is_showing = false;
+    map.on('sourcedata', function (e) {
+        if (e.isSourceLoaded && loader_is_showing == true) {
+            map.removeControl(loader_ctrl);
+            loader_is_showing = false;
+        } else if (e.isSourceLoaded != true && loader_is_showing == false) {
+            map.addControl(loader_ctrl, 'bottom-left');
+            loader_is_showing = true;
+        }
     });
 
 
@@ -356,16 +425,14 @@
             ]
         });
 
-        console.log(map.getSource('postgis-tiles'));
 
         var sourceLayer = 'public.snow_function_source';
 
         map.addLayer({
                 'id': 'public.snow_db.snow',
-                'type': 'fill', //line
+                'type': 'fill',
                 'source': 'postgis-tiles',
-                // ST_AsMVT() uses 'default' as layer name
-                'source-layer': sourceLayer, // todo change here!
+                'source-layer': sourceLayer,
                 'minzoom': 0,
                 'maxzoom': 15,
                 'paint': {
@@ -377,6 +444,7 @@
             firstSymbolId
         )
         ;
+        console.log(map);
 
 
         map.addLayer({
@@ -405,7 +473,7 @@
         });
         var day;
         for (day = 0; day < 14; day++) {
-            var color = "hsl(" + (53 + 70 / 14 * (14 - day)) + ",75%,50%)";
+            var color = "hsl(" + (45 + 40 / 14 * (14 - day)) + ",75%,50%)";
             var show_dates = document.createElement('button');
             show_dates.style.backgroundColor = color;
             show_dates.addEventListener('click', function () {
@@ -496,9 +564,18 @@
             // Value indicator
             day_sliderValue.textContent = e.target.value + '';
         });
+
+        console.log(
+            map.areTilesLoaded());
+
     });
     map.addControl(new mapboxgl.AttributionControl({'customAttribution': '<a href="/about_us.html">About us</a> | <a href="/about_us.html#imprint">Imprint</a>'}))
     map.addControl(new mapboxgl.NavigationControl());
+
+
+
+
+
 </script>
 
 </body>
