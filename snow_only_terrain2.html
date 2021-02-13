@@ -58,7 +58,7 @@
         margin: 0 0 10px;
     }
 
-    .map-overlay input {
+    .map-overlay input[type=range] {
         background-color: transparent;
         display: inline-block;
         width: 100%;
@@ -147,6 +147,8 @@
                 step="0"
                 value="6"
         />
+        The data you see is an aggregate of several days of satellite overflights.
+        When you hover over the map, the red boxes display on which dates the data was taken.
         <label>View data from the last <span id="day-slider-value">14</span> day(s).</label>
         <input
                 id="day-slider"
@@ -156,15 +158,15 @@
                 step="1"
                 value="14"
         />
-        You are viewing data from the (XXX-XXX).
-        <br>
-        Show dates <input type="checkbox" id="time-style">.<br>
-        Legend
         <fieldset>
-            0
-            <div id="date-viewer"></div>
-            14
+            today
+            <span id="date-viewer"></span>
+            14 days ago
         </fieldset>
+        <label class="checkbox-inline">
+            <input type="checkbox" id="time-style"> enable date coloring
+        </label>
+
 
     </div>
 </div>
@@ -197,10 +199,20 @@
     var snow_slider = document.getElementById('snow-slider');
     var snow_sliderValue = document.getElementById('snow-slider-value');
 
+    // convert between number of days since 1970 (datediff)
+    // and number of days before today (lastdays)
     var now = new Date();
     console.log(now);
     var now_in_days = Math.floor(now / 8.64e7);
     console.log(now_in_days);
+
+    function datediff_to_lastdays(datediff) {
+        return now_in_days - datediff;
+    }
+
+    function lastdays_to_datediff(lastdays) {
+        return now_in_days - lastdays;
+    }
 
     var snow_fill_style = ["interpolate",
         ["linear"],
@@ -367,6 +379,7 @@
         attributionControl: false,
 
     });
+
     class LoaderControl {
         onAdd(map) {
             this._map = map;
@@ -389,6 +402,7 @@
             this._map = undefined;
         }
     }
+
     var loader_ctrl = new LoaderControl();
     var loader_is_showing = false;
     map.on('sourcedata', function (e) {
@@ -402,16 +416,17 @@
     });
 
 
+
     map.on('load', function () {
 
         var layers = map.getStyle().layers;
 // Find the index of the first symbol layer in the map style
-        var firstSymbolId;
+        var firstWaterLayerId;
         for (var i = 0; i < layers.length; i++) {
             console.log(i);
             console.log(layers[i].type);
             if (layers[i].id === 'water') {
-                firstSymbolId = layers[i].id;
+                firstWaterLayerId = layers[i].id;
                 break;
             }
         }
@@ -441,17 +456,15 @@
 
                 }
             },
-            firstSymbolId
+            firstWaterLayerId
         )
         ;
-        console.log(map);
 
 
         map.addLayer({
             'id': 'public.snow_db.cloud',
-            'type': 'fill', //line
+            'type': 'fill',
             'source': 'postgis-tiles',
-            // ST_AsMVT() uses 'default' as layer name
             'source-layer': sourceLayer,
             'minzoom': 0,
             'maxzoom': 15,
@@ -470,24 +483,6 @@
                 ]
             }
 
-        });
-        var day;
-        for (day = 0; day < 14; day++) {
-            var color = "hsl(" + (45 + 40 / 14 * (14 - day)) + ",75%,50%)";
-            var show_dates = document.createElement('button');
-            show_dates.style.backgroundColor = color;
-            show_dates.addEventListener('click', function () {
-                console.log(day);
-            });
-            date_viewer.appendChild(show_dates);
-
-        }
-        console.log(layers);
-
-        map.on('mousemove', 'public.snow_db.snow', function (e) {
-            if (e.features.length > 0) {
-                console.log(e.features);
-            }
         });
 
 
@@ -564,16 +559,42 @@
             // Value indicator
             day_sliderValue.textContent = e.target.value + '';
         });
-
-        console.log(
-            map.areTilesLoaded());
-
     });
     map.addControl(new mapboxgl.AttributionControl({'customAttribution': '<a href="/about_us.html">About us</a> | <a href="/about_us.html#imprint">Imprint</a>'}))
     map.addControl(new mapboxgl.NavigationControl());
 
+    var day;
+    var day_controls = [];
+    for (day = 0; day < 14; day++) {
+        var color = "hsl(" + (85- 40 / 14 * (day)) + ",75%,50%)";
+        var show_dates = document.createElement('button');
+        show_dates.style.backgroundColor = color;
+        show_dates.addEventListener('click', function () {
+            console.log(day);
+        });
+        date_viewer.appendChild(show_dates);
+        day_controls.push(show_dates);
+
+    }
 
 
+    map.on('mousemove', 'public.snow_db.snow', function (e) {
+        if (e.features.length > 0) {
+            var features = e.features.filter(feat => feat['properties']['dn'] < 101);
+
+            var selected_days = features.map(feat => feat['properties']['datediff']);
+
+            day_controls.forEach(function (control, i){
+                if (selected_days.includes(lastdays_to_datediff(i+1))){
+                    control.style.boxShadow = 'inset 0 0 0 3px rgba(255, 0, 0, 1)';
+                } else {
+                    control.style.boxShadow = 'inset 0 0 0 3px rgba(255, 0, 0, 0)';
+                }
+
+            });
+
+        }
+    });
 
 
 </script>
