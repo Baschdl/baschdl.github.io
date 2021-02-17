@@ -13,7 +13,7 @@ In the image of the Alps below, a white area could be both snow or clouds.
 Zooming in, you could even mistake buildings or rock formations for snow because of their white coloring.
 On the contrary, old snow gets darker and mushier, but it still is snow.
 
-![](res/the_alps.png)
+![](res/the_alps.jpg)
 
 What is helpful to detect the snow is that the satellites do not only record the light reflected from the earths surface that is
 visible to the human eye.
