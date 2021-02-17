@@ -18,7 +18,7 @@ On the contrary, old snow gets darker and mushier, but it still is snow.
 What is helpful to detect the snow is that the satellites do not only record the light reflected from the earths surface that is
 visible to the human eye.
 They additionally capture higher and lower wave lengths, and snow and clouds reflect different kinds of wave lengths with different strengths, which 
-makes their profiles differ [cite the reviwe paper https://www.tandfonline.com/doi/full/10.1080/01431161.2011.640964].
+makes their light reflection profiles differ [cite the reviwe paper https://www.tandfonline.com/doi/full/10.1080/01431161.2011.640964].
 
 ![](res/reflection_profile.png)
 
