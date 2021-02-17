@@ -2,8 +2,19 @@
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title>Mapbox GL JS Examples</title>
+    <title>Snow Cover Map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet'/>
     <style>
@@ -87,7 +98,7 @@
         margin: 0 0 5px;
     }
 
-    .map-overlay-inner button {
+    .map-overlay-inner .button-legend button {
         display: inline-block;
         width: 15px;
         height: 20px;
@@ -115,20 +126,22 @@
         }
     }
 
-    .map-overlay-inner button:focus {
+    .map-overlay-inner .button-legend button:focus {
         outline: none;
     }
 
-    .map-overlay-inner button:hover {
+    .map-overlay-inner .button-legend button:hover {
         box-shadow: inset 0 0 0 3px rgba(255, 0, 0, 0.5);
     }
 
 </style>
-
 <div id='map'></div>
 
 <div class="map-overlay top">
     <div class="map-overlay-inner">
+        <span style="font-size: large">Snow Cover Map</span>
+        <a href="#"  onclick="$('#exampleModal').modal('show');" class="stretched-link">How it works.</a><br>
+        <hr>
         <label>Snow opacity: <span id="snow-slider-value">100%</span></label>
         <input
                 id="snow-slider"
@@ -147,9 +160,16 @@
                 step="0"
                 value="6"
         />
-        The data you see is an aggregate of several days of satellite overflights.
-        When you hover over the map, the red boxes display on which dates the data was taken.
-        <label>View data from the last <span id="day-slider-value">14</span> day(s).</label>
+        <label>View data from the last <span id="day-slider-value">14</span> day(s).
+            <a id="popoverData"  href="#"  data-toggle="popover"
+               data-content="The data you see is an aggregate of several days of satellite overflights. When you hover over the map, the red boxes display on which dates the snow was observed."
+               rel="popover"
+               data-placement="right" data-trigger="hover">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+  <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+</svg></label>
+            </a>
         <input
                 id="day-slider"
                 type="range"
@@ -158,7 +178,7 @@
                 step="1"
                 value="14"
         />
-        <fieldset>
+        <fieldset class="button-legend">
             today
             <span id="date-viewer"></span>
             14 days ago
@@ -166,14 +186,90 @@
         <label class="checkbox-inline">
             <input type="checkbox" id="time-style"> enable date coloring
         </label>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h2>How does it work?</h2>
+<h3 id="detecting-snow-from-space">Detecting snow from space</h3>
+<p>The snow cover we show on the map is calculated from two satellites from the european Copernicus
+program, named <a href="https://sentinel.esa.int/web/sentinel/missions/sentinel-2">Sentinal 2a and 2b</a>.
+They record images of the earth&#39;s surface as they are orbiting our planet in a height of 786km.
+These images allow us to determine the surface snow cover with a very high resolution: The satellites can measure each
+20x20m patch individually, which is much better than only using the weather stations at the ground (in Germany there are ~800 [todo -&gt; to resolution]).</p>
+<p>Actually, it is not straightforward to tell directly from the satellite image whether snow occupies such a small patch or not.
+In the image of the Alps below, a white area could be both snow or clouds.
+Zooming in, you could even mistake buildings or rock formations for snow because of their white coloring.
+On the contrary, old snow gets darker and mushier, but it still is snow.</p>
+<p><img style="max-width: 50%; height: auto;" src="res/the_alps.jpg" alt=""><img style="max-width: 50%; height: auto;"  src="res/reflection_profile.png" alt=""></p>
+<p>What is helpful to detect the snow is that the satellites do not only record the light reflected from the earths surface that is
+visible to the human eye.
+They additionally capture higher and lower wave lengths, and snow and clouds reflect different kinds of wave lengths with different strengths, which
+makes their light reflection profiles differ [cite the reviwe paper <a href="https://www.tandfonline.com/doi/full/10.1080/01431161.2011.640964">https://www.tandfonline.com/doi/full/10.1080/01431161.2011.640964</a>].</p>
 
+<p>Since these profiles differ depending on the age of the snow, its temperature, the dust in the air or the humidity of a cloud,
+it is not trivial to tell
+snow surfaces apart from other surfaces even if we have access to the complete profile.
+More advanced methods work better ... machine learning.
+In our case, we use the <a href="https://land.copernicus.eu/user-corner/technical-library/hrsi-snow-pum">snow product</a> directly provided by the  E.U. Copernicus Land Service Information.
+It uses the algorithm developed by  ... that works like ....
+Finally, when clouds are occluding the surface area below them, we can no longer detect snow in these areas.
+This is why we allow you to also view when we detected clouds in a satellite image - to be informed that the lack of snow
+is not due to being sure that there is no snow, but because we detected a cloud and cannot see below it.</p>
+<h3 id="creating-satellite-imagery">Creating satellite imagery</h3>
+<p>In order to use this map properly it is helpful to understand how the satellite imagery is generated.
+Although the map is presented as a &#39;whole&#39;, it is actually made up of many small image tiles that were taken each at a different
+time.
+So what you see is a mosaic of snapshots of several moments rather than a snapshot of the whole earth at the same time.
+This has several reasons: Firstly, the sentinel satellites require sunlight to take images, so even if they had the possibility
+to take an image of the whole earth at once, about half of it would be useless (the part where it is night ...).
+Secondly, the satellites can only capture images in only a small range around them, so they have to orbit the earth
+several times (and with a fixed speed) until they have seen the whole world once.
+For one sentinel satellite this orbit takes 4 days. Having two of them up in the air, we get an image of every
+place on earth about every two days.
+You can see exemplary orbits in the image below and also flight over times for the satellite for different of the image tiles
+that make up the mosaic.</p>
+<p><img class="img-fluid"  src="res/satellite_orbit.png" alt=""></p>
+<p>This kind of time independent tiling can lead to some effects that may seem unintuitive at the first view, e.g. snow areas that
+are cut off by a straight line that crosses straight over the length of Germany. The simple explanation is that
+the snow melted in the time it took to capture the neighbouring areas.
+Also, this could happen if there were some clouds that occluded the surface.
+The example below shows how the images of 3 days would be combined into one snow cover map given what the earth
+looked like at that moment in time.
+To give you more control over this, we let you decide on your own how many of the last days you would like to view on
+the map and show on which days the snow was actually observed on hovering over the map.</p>
+<p><img class="img-fluid"  src="res/overflight_aggregate.png" alt=""></p>
+<p>As the atmosphere is rarely cloud free, especially when it is snowing and prevents us from detecting snow at all, we show the last 14
+days by default for an overview.
+In this time, each area is covered by 7 satellite overflights which hopefully includes a cloud free day.
+As the predicted snow cover is simply aggregated on top of one another and can lead to misleading conclusions, we allow you to
+enable the date coloring and see directly how old each detected patch of snow is.</p>
+<p><img class="img-fluid"  src="res/day_aggregate.png" alt=""></p>
+<h3 id="i-don-t-care-about-the-snow-product-can-i-use-the-project-for-other-data-">I don&#39;t care about the snow product, can I use the project for other data?</h3>
+<ul>
+<li>docker</li>
+<li>polygonizing, masking, postgis</li>
+<li>tileserving with martin: <a href="https://github.com/urbica/martin#function-sources">https://github.com/urbica/martin#function-sources</a></li>
+</ul>
+<h3 id="references">References</h3>
+<ul>
+<li>Inspired by: www.theia-land.fr</li>
+</ul>
 
+      </div>
     </div>
+  </div>
 </div>
+    </div>
+
+</div>
+
 
 
 <script>
 
+    $('#popoverData').popover();
 
     // example for buttons on overlay
     // https://docs.mapbox.com/mapbox-gl-js/example/color-switcher/
@@ -370,7 +466,6 @@
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiZnJlcmVmcmUiLCJhIjoiY2trcjkyN3lmMDFkaTJxcDZ2N2ZvY3hkZyJ9.NYXtgKcY3IC5rLup-HyweA';
 
-
     var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/outdoors-v11',
@@ -414,7 +509,6 @@
             loader_is_showing = true;
         }
     });
-
 
 
     map.on('load', function () {
@@ -560,13 +654,13 @@
             day_sliderValue.textContent = e.target.value + '';
         });
     });
-    map.addControl(new mapboxgl.AttributionControl({'customAttribution': '<a href="/about_us.html">About us</a> | <a href="/about_us.html#imprint">Imprint</a>'}))
+    map.addControl(new mapboxgl.AttributionControl({'customAttribution': '<a href="/about_us.html">About us</a> | <a href="/about_us.html#imprint">Imprint</a> | <a href="https://scihub.copernicus.eu/dhus/#/home">Generated using E.U. Copernicus Land Service Information ' + new Date().getFullYear() + '</a>'}))
     map.addControl(new mapboxgl.NavigationControl());
 
     var day;
     var day_controls = [];
     for (day = 0; day < 14; day++) {
-        var color = "hsl(" + (85- 40 / 14 * (day)) + ",75%,50%)";
+        var color = "hsl(" + (85 - 40 / 14 * (day)) + ",75%,50%)";
         var show_dates = document.createElement('button');
         show_dates.style.backgroundColor = color;
         show_dates.addEventListener('click', function () {
@@ -584,8 +678,8 @@
 
             var selected_days = features.map(feat => feat['properties']['datediff']);
 
-            day_controls.forEach(function (control, i){
-                if (selected_days.includes(lastdays_to_datediff(i+1))){
+            day_controls.forEach(function (control, i) {
+                if (selected_days.includes(lastdays_to_datediff(i + 1))) {
                     control.style.boxShadow = 'inset 0 0 0 3px rgba(255, 0, 0, 1)';
                 } else {
                     control.style.boxShadow = 'inset 0 0 0 3px rgba(255, 0, 0, 0)';
