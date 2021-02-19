@@ -70,11 +70,9 @@ enable the date coloring and see directly how old each detected patch of snow is
 
 
 
-## I don't care about the snow product, can I use the project for other data?
+## I don't care about snow, can I use the project to serve other geo data online?
 
-- docker
-- polygonizing, masking, postgis
-- tileserving with martin: https://github.com/urbica/martin#function-sources
+Contact us at mail@fancydomain.com to discuss if our solution fits your needs.
 
 
 ## References
